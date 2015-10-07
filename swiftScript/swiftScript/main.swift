@@ -1,3 +1,4 @@
+#!/usr/bin/env xcrun swift
 //
 //  main.swift
 //  swiftScript
@@ -7,6 +8,8 @@
 //
 
 import Foundation
+
+dump(Process.arguments)
 
 let input = Process.arguments[1]
 print("Input is: \(input)" )

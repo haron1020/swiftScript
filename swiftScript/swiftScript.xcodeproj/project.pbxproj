@@ -238,6 +238,7 @@
 				BAB806AA1BC3F964007C676D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

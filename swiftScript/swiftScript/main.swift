@@ -8,5 +8,5 @@
 
 import Foundation
 
-print("Hello, World!")
-
+let input = Process.arguments[1]
+print("Input is: \(input)" )

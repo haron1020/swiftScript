@@ -19,6 +19,7 @@ enum Types {
     case function(op: String, fn: (Double) -> Double)
 }
 
+
 class Node {
     var key:String?
     var left:Node?

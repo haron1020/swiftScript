@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		BAB806A51BC3F964007C676D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB806A41BC3F964007C676D /* main.swift */; };
+		BAD101611BC7FF580024F3B2 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAD101601BC7FF580024F3B2 /* main.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,7 +24,7 @@
 
 /* Begin PBXFileReference section */
 		BAB806A11BC3F964007C676D /* swiftScript */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = swiftScript; sourceTree = BUILT_PRODUCTS_DIR; };
-		BAB806A41BC3F964007C676D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		BAD101601BC7FF580024F3B2 /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +57,7 @@
 		BAB806A31BC3F964007C676D /* swiftScript */ = {
 			isa = PBXGroup;
 			children = (
-				BAB806A41BC3F964007C676D /* main.swift */,
+				BAD101601BC7FF580024F3B2 /* main.swift */,
 			);
 			path = swiftScript;
 			sourceTree = "<group>";
@@ -88,6 +88,7 @@
 		BAB806991BC3F964007C676D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0710;
 				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = "Andrey Nazarov";
 				TargetAttributes = {
@@ -118,7 +119,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BAB806A51BC3F964007C676D /* main.swift in Sources */,
+				BAD101611BC7FF580024F3B2 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -208,13 +209,18 @@
 		BAB806A91BC3F964007C676D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		BAB806AA1BC3F964007C676D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

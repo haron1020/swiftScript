@@ -19,7 +19,6 @@ enum Types {
     case function(op: String, fn: (Double) -> Double)
 }
 
-
 class Node {
     var key:String?
     var left:Node?
@@ -49,7 +48,6 @@ class Tree {
 
 var myTree = Tree()
 print(myTree.isEmpty())
-//myTree.addNode(input)
 
 let input = Process.arguments[1]
 print("Input is: \(input)" )

@@ -9,21 +9,6 @@
 
 import Foundation
 
-extension String {
-    subscript(i: Int) -> String {
-        return String(self[self.startIndex.advancedBy(i)])
-    }
-}
-
-func eraseSpaces(inout arg: String) {
-    for (var i = 0; i<arg.characters.count;i++) {
-        if arg[i] == " " {
-            arg.removeAtIndex(arg.startIndex.advancedBy(i))
-            --i
-        }
-    }
-}
-
 enum Types {
     case binaryOperation
     case argument
@@ -32,18 +17,12 @@ enum Types {
     //case function(op: String, fn: (Double) -> Double)
 }
 class Node {
-    var key:String
+    var key:String=""
     var kind:Types?
     var left:Node?
     var right:Node?
     var parent:Node?
-    init() {
-        self.left = nil
-        self.right = nil
-        self.key = ""
-        self.parent = nil
-        kind = nil
-    }
+    init(){}
 }
 /*
 MODES:
@@ -53,18 +32,12 @@ MODES:
 */
 class Tree {
     var root: Node?
-    var mode: Int
-    init() {
-        root = nil
-        mode = 0
-    }
+    var mode: Int=0
+    init() {}
     func isEmpty() -> Bool {
-        if self.root == nil {
-            return true
-        }
-        return false
+       return self.root == nil
     }
-    func checkNodes() {
+    func checkNodes(){
         if root == nil {
             root = Node()
             mode++
@@ -82,11 +55,11 @@ class Tree {
         mode = (mode+1)%3
     }
     
-    func getToken(input: String) {
+    func getToken(input: String) -> Bool {// returns false if error
         self.checkNodes()
         for s in input.characters {
             switch s {
-            case "0","1","2","3","4","5","6","7","8","9":
+            case s where s >= "0" && s <= "9":
                 if mode == 0 {
                     root!.right!.key.append(s)
                     root!.right!.kind = Types.argument
@@ -98,6 +71,25 @@ class Tree {
                     root!.left!.parent = root
                 }
                 break
+            case ".":
+                if mode == 0 {
+                    if root!.right!.key.rangeOfString(".") != nil {
+                        return false
+                    }
+                    root!.right!.key.append(s)
+                    root!.right!.kind = Types.argument
+                    root!.right!.parent = root
+                }
+                if mode == 2 {
+                    if root!.left!.key.rangeOfString(".") != nil {
+                        return false
+                    }
+                    root!.left!.key.append(s)
+                    root!.left!.kind = Types.argument
+                    root!.left!.parent = root
+                }
+                break
+                
             case "+":
                 root!.key = "+"
                 self.checkNodes()
@@ -110,6 +102,7 @@ class Tree {
                 break
             }
         }
+        return true
     }
     func calc() {
         switch root!.key {
@@ -126,11 +119,12 @@ class Tree {
 
 //dump(Process.arguments)
 var input = Process.arguments[1]
-//var input = "    3         - 6        9"
-eraseSpaces(&input)
+input = input.stringByReplacingOccurrencesOfString(" ", withString: "")
 print("Input is: \(input)" )
 
 var myTree = Tree()
 myTree.getToken(input)
 myTree.calc()
-print(myTree.root?.key)
+print(myTree.root!.key)
+
+

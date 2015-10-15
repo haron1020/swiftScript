@@ -9,122 +9,147 @@
 
 import Foundation
 
-enum Types {
-    case binaryOperation
-    case argument
-    case unaryOperation(op: String, fn:(Double) -> Double)
-    case const(Op: String -> Double)
-    //case function(op: String, fn: (Double) -> Double)
+enum Priority:Int {
+    case trig = 10
+    case exp = 8
+    case multiply = 6
+    case adding = 4
+    case bracket = 2
+    case operand = 0
 }
-class Node {
-    var key:String=""
-    var kind:Types?
-    var left:Node?
-    var right:Node?
-    var parent:Node?
-    init(){}
+enum Kind {
+    case operand
+    case operation
 }
-/*
-MODES:
-0 - need parent
-1 - need left
-2 - need right
-*/
-class Tree {
-    var root: Node?
-    var mode: Int=0
-    init() {}
-    func isEmpty() -> Bool {
-       return self.root == nil
-    }
-    func checkNodes(){
-        if root == nil {
-            root = Node()
-            mode++
+
+class Node<T> {
+    var _next:Node? = nil
+    var _key:T? = nil
+    var _priority:Priority? = nil
+    var _kind:Kind? = nil
+}
+class Stack<T> {
+    var _head:Node<T>? = nil
+    var _size:Int = 0
+    func push(key:T, priority:Priority, kind:Kind) {
+        if _head != nil {
+            let temp = Node<T>()
+            temp._key = key
+            temp._next = _head
+            _head = temp
+            temp._priority = priority
+            temp._kind = kind
+        } else {
+            _head = Node()
+            _head!._key = key
+            _head!._priority = priority
+            _head!._kind = kind
         }
-        switch mode {
-        case 0:
-            break
-        case 1:
-            root?.left = Node()
-        case 2:
-            root?.right = Node()
-        default:
-            break
-        }
-        mode = (mode+1)%3
+        _size++
     }
-    
-    func getToken(input: String) -> Bool {// returns false if error
-        self.checkNodes()
-        for s in input.characters {
-            switch s {
-            case s where s >= "0" && s <= "9":
-                if mode == 0 {
-                    root!.right!.key.append(s)
-                    root!.right!.kind = Types.argument
-                    root!.right!.parent = root
-                }
-                if mode == 2 {
-                    root!.left!.key.append(s)
-                    root!.left!.kind = Types.argument
-                    root!.left!.parent = root
-                }
-                break
-            case ".":
-                if mode == 0 {
-                    if root!.right!.key.rangeOfString(".") != nil {
-                        return false
-                    }
-                    root!.right!.key.append(s)
-                    root!.right!.kind = Types.argument
-                    root!.right!.parent = root
-                }
-                if mode == 2 {
-                    if root!.left!.key.rangeOfString(".") != nil {
-                        return false
-                    }
-                    root!.left!.key.append(s)
-                    root!.left!.kind = Types.argument
-                    root!.left!.parent = root
-                }
-                break
-                
-            case "+":
-                root!.key = "+"
-                self.checkNodes()
-                root?.kind = Types.binaryOperation
-            case "-":
-                root!.key = "-"
-                self.checkNodes()
-                root?.kind = Types.binaryOperation
-            default:
-                break
+    func pop() -> T? {
+        if _size != 0 {
+            let temp = _head!._key
+            let ptr = _head
+            _head = _head?._next
+            ptr?._next = nil
+            _size--
+            return temp!
+        }
+        return nil
+    }
+    func isEmpty()->Bool {
+        return _head == nil
+    }
+    func seek()->Int? {
+        if _head != nil {
+            return _head?._priority?.rawValue
+        }
+        return 0
+    }
+}
+
+func strToRpn(input:String)->String?{//returns nil if error
+    var result = ""
+    let operations = Stack<String>()
+    var token = ""
+    for s in input.characters {
+        switch s {
+        case s where (s >= "0" && s <= "9"):
+            token.append(s)
+        case "*","/":
+            if token == "" {
+                return nil
             }
-        }
-        return true
-    }
-    func calc() {
-        switch root!.key {
-        case "+":
-            root!.key = String(Double((root!.left!.key))! + Double(root!.right!.key)!)
-        case "-":
-            root!.key = String(Double((root!.left!.key))! - Double(root!.right!.key)!)
+            result = result + token + " "
+            token = ""
+            if Priority.multiply.rawValue <= operations.seek() {
+                while !operations.isEmpty() {
+                    result = result + operations.pop()! + " "
+                }
+            }
+            operations.push(String(s), priority: Priority.multiply, kind:Kind.operation)
+        case "+","-":
+            if token == "" {
+                return nil
+            }
+            result = result + token + " "
+            token = ""
+            if Priority.adding.rawValue <= operations.seek() {
+                while !operations.isEmpty() {
+                    result = result + operations.pop()! + " "
+                }
+            }
+            operations.push(String(s), priority: Priority.adding, kind:Kind.operation)
+        case ".":
+            if token.rangeOfString(".") != nil {
+                return nil
+            }
+            token = token + "."
         default:
             break
         }
-        root!.kind = Types.argument
     }
+    result = result + token
+    while !operations.isEmpty() {
+        result = result + " " + operations.pop()!
+    }
+    return result
 }
+func calc(RPN: String) -> Double? {
+    let calculatingStack = Stack<Double>()
+    let myStringArr = RPN.componentsSeparatedByString(" ")
+    for item in myStringArr {
+        switch item {
+            case "+":
+                calculatingStack.push(calculatingStack.pop()! + calculatingStack.pop()!, priority: Priority.operand, kind: Kind.operand)
+            case "*":
+                calculatingStack.push(calculatingStack.pop()! * calculatingStack.pop()!, priority: Priority.operand, kind: Kind.operand)
+            case "/":
+                calculatingStack.push(calculatingStack.pop()! / calculatingStack.pop()!, priority: Priority.operand, kind: Kind.operand)
+            case "-":
+                calculatingStack.push((-1)*calculatingStack.pop()! + calculatingStack.pop()!, priority: Priority.operand, kind: Kind.operand)
+            
+        default:
+            calculatingStack.push(Double(item)!, priority: Priority.operand, kind: Kind.operand)
+        }
+    }
+    return calculatingStack.pop()
+}
+
 
 //dump(Process.arguments)
-var input = Process.arguments[1]
-input = input.stringByReplacingOccurrencesOfString(" ", withString: "")
-print("Input is: \(input)" )
+//var input = Process.arguments[1]
+var input = "123-123-1-23-123-123-12-31-23-123-12-31-23-123-12-31-23-234-5-2345-2345-234-523-45-2345-3245-2345-2345234-5234-5234-5324-5234-523-4523-4523-45-2345-3245-234523-4523-45-3425-2345-324523-45-2345-2345-234-5-3"
+input = input.stringByReplacingOccurrencesOfString(" ", withString: "")//delete spaces
+let x = strToRpn(input)
+if x != nil {
+    print(calc(x!)!)
+}
+else {
+    print("Syntax error")
+}
 
-var myTree = Tree()
-myTree.getToken(input)
-myTree.calc()
-print(myTree.root!.key)
+
 
 

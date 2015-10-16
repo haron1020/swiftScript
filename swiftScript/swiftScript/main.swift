@@ -1,5 +1,4 @@
-
-//#!/usr/bin/env xcrun swift
+#!/usr/bin/env xcrun swift
 //
 //  main.swift
 //  swiftScript
@@ -15,7 +14,7 @@ import Foundation
 //dump(Process.arguments)
 //var input = Process.arguments[1]
 
-var input : String? = "2 + 2 *       2"
+var input : String? = "(1+2)*3"
 
 var myCalc : CalculatorBody? = CalculatorBody()
 myCalc!.set(input!)

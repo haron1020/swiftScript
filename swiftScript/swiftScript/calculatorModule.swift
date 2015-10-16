@@ -60,16 +60,15 @@ class Stack<T> {
     func isEmpty()->Bool {
         return head == nil
     }
-    func seek()->Int? {
-        if let head = head{
-            return head.priority!.rawValue
-        }
-        return 0
+    func seekHeadKey() -> T? {
+        return head != nil ? head!.key : nil
+    }
+    func seekHeadPriority() -> Priority? {
+        return head != nil ? head!.priority : nil
     }
 }
 
 class CalculatorBody {
-    
     private var inputString = ""
     private var postfixString = ""
     private let operationsStack = Stack<String>()
@@ -90,53 +89,77 @@ class CalculatorBody {
         return result
     }
     
-    func evaluate()->ErrorType {
+    func evaluate()->Double?{
         let error = stringToPostfix()
-        if error != ErrorType.noError {
-            return error
+        if errorHandler(error) {
+            return 0.0
         }
         result = calc()!
+        return result
+    }
+    
+    func errorHandler(error:ErrorType) -> Bool { //returns false if no errors
+        switch error {
+        case ErrorType.syntaxError:
+            print("Syntax Error")
+            return true
+        case ErrorType.bracketsError:
+            print("Mismatched brackets")
+            return true
+        default:
+            break
+        }
+        return false
+    }
+    
+    func addExpressionToStack(inout token:String, expression:String, expressionPriority:Priority) -> ErrorType {
+        if token == ""{
+            return ErrorType.syntaxError
+        }
+        postfixString = postfixString + token + " "
+        token = ""
+        while !operationsStack.isEmpty() && expressionPriority.rawValue <= operationsStack.seekHeadPriority()?.rawValue{
+            postfixString = postfixString + operationsStack.pop()! + " "
+        }
+        
+        operationsStack.push(String(expression), priority: expressionPriority)
+        return ErrorType.noError
+    }
+    
+    func bracketHandler() -> ErrorType {
+        while operationsStack.seekHeadKey() != "("  && operationsStack.head != nil{
+            postfixString = postfixString + operationsStack.pop()! + " "
+        }
+        operationsStack.pop()
         return ErrorType.noError
     }
     
     func stringToPostfix()->ErrorType{
         inputString = inputString.stringByReplacingOccurrencesOfString(" ", withString: "")//delete spaces
         var token = ""
+        var error = ErrorType.noError
         for s in inputString.characters {
             switch s {
             case s where (s >= "0" && s <= "9"):
                 token.append(s)
             case "*","/":
-                if token == "" {
-                    return ErrorType.syntaxError
-                }
-                postfixString = postfixString + token + " "
-                token = ""
-                if Priority.multiply.rawValue <= operationsStack.seek() {
-                    while !operationsStack.isEmpty() {
-                        postfixString = postfixString + operationsStack.pop()! + " "
-                    }
-                }
-                operationsStack.push(String(s), priority: Priority.multiply)
+                error = addExpressionToStack(&token, expression: String(s), expressionPriority: Priority.multiply)
             case "+","-":
-                if token == "" {
-                    return ErrorType.syntaxError
-                }
-                postfixString = postfixString + token + " "
-                token = ""
-                if Priority.adding.rawValue <= operationsStack.seek() {
-                    while !operationsStack.isEmpty() {
-                        postfixString = postfixString + operationsStack.pop()! + " "
-                    }
-                }
-                operationsStack.push(String(s), priority: Priority.adding)
+                error = addExpressionToStack(&token, expression: String(s), expressionPriority: Priority.adding)
             case ".":
                 if token.rangeOfString(".") != nil {
                     return ErrorType.syntaxError
                 }
                 token = token + "."
+            case "(":
+                error = addExpressionToStack(&token, expression: "(", expressionPriority: Priority.bracket)
+            case ")":
+                error = bracketHandler()
             default:
                 break
+            }
+            if error != ErrorType.noError {
+                return error
             }
         }
         postfixString = postfixString + token
@@ -164,5 +187,6 @@ class CalculatorBody {
         }
         return calculatingStack.pop()
     }
+    
 }
 

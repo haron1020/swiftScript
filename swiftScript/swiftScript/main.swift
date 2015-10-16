@@ -17,53 +17,45 @@ enum Priority:Int {
     case bracket = 2
     case operand = 0
 }
-enum Kind {
-    case operand
-    case operation
-}
-
 class Node<T> {
-    var _next:Node? = nil
-    var _key:T? = nil
-    var _priority:Priority? = nil
-    var _kind:Kind? = nil
+    var next:Node? = nil
+    var key:T? = nil
+    var priority:Priority? = nil
 }
 class Stack<T> {
-    var _head:Node<T>? = nil
-    var _size:Int = 0
-    func push(key:T, priority:Priority, kind:Kind) {
-        if _head != nil {
+    var head:Node<T>? = nil
+    var size:Int = 0
+    func push(key:T, priority:Priority) {
+        if head != nil {
             let temp = Node<T>()
-            temp._key = key
-            temp._next = _head
-            _head = temp
-            temp._priority = priority
-            temp._kind = kind
+            temp.key = key
+            temp.next = head
+            head = temp
+            temp.priority = priority
         } else {
-            _head = Node()
-            _head!._key = key
-            _head!._priority = priority
-            _head!._kind = kind
+            head = Node()
+            head!.key = key
+            head!.priority = priority
         }
-        _size++
+        size++
     }
     func pop() -> T? {
-        if _size != 0 {
-            let temp = _head!._key
-            let ptr = _head
-            _head = _head?._next
-            ptr?._next = nil
-            _size--
+        if size != 0 {
+            let temp = head!.key
+            let ptr = head
+            head = head?.next
+            ptr?.next = nil
+            size--
             return temp!
         }
         return nil
     }
     func isEmpty()->Bool {
-        return _head == nil
+        return head == nil
     }
     func seek()->Int? {
-        if _head != nil {
-            return _head?._priority?.rawValue
+        if let head = head{
+            return head.priority!.rawValue
         }
         return 0
     }
@@ -88,7 +80,7 @@ func strToRpn(input:String)->String?{//returns nil if error
                     result = result + operations.pop()! + " "
                 }
             }
-            operations.push(String(s), priority: Priority.multiply, kind:Kind.operation)
+            operations.push(String(s), priority: Priority.multiply)
         case "+","-":
             if token == "" {
                 return nil
@@ -100,7 +92,7 @@ func strToRpn(input:String)->String?{//returns nil if error
                     result = result + operations.pop()! + " "
                 }
             }
-            operations.push(String(s), priority: Priority.adding, kind:Kind.operation)
+            operations.push(String(s), priority: Priority.adding)
         case ".":
             if token.rangeOfString(".") != nil {
                 return nil
@@ -122,16 +114,16 @@ func calc(RPN: String) -> Double? {
     for item in myStringArr {
         switch item {
             case "+":
-                calculatingStack.push(calculatingStack.pop()! + calculatingStack.pop()!, priority: Priority.operand, kind: Kind.operand)
+                calculatingStack.push(calculatingStack.pop()! + calculatingStack.pop()!, priority: Priority.operand)
             case "*":
-                calculatingStack.push(calculatingStack.pop()! * calculatingStack.pop()!, priority: Priority.operand, kind: Kind.operand)
+                calculatingStack.push(calculatingStack.pop()! * calculatingStack.pop()!, priority: Priority.operand)
             case "/":
-                calculatingStack.push(calculatingStack.pop()! / calculatingStack.pop()!, priority: Priority.operand, kind: Kind.operand)
+                calculatingStack.push(calculatingStack.pop()! / calculatingStack.pop()!, priority: Priority.operand)
             case "-":
-                calculatingStack.push((-1)*calculatingStack.pop()! + calculatingStack.pop()!, priority: Priority.operand, kind: Kind.operand)
+                calculatingStack.push((-1)*calculatingStack.pop()! + calculatingStack.pop()!, priority: Priority.operand)
             
         default:
-            calculatingStack.push(Double(item)!, priority: Priority.operand, kind: Kind.operand)
+            calculatingStack.push(Double(item)!, priority: Priority.operand)
         }
     }
     return calculatingStack.pop()
